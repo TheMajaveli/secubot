@@ -1,5 +1,5 @@
 """
-OpenAI-based explanation layer for SecuBot scan reports.
+LLM explanation layer for SecuBot scan reports (Anthropic or OpenAI).
 
 Produces concise French summaries suitable for demos and CV use.
 """
@@ -10,6 +10,7 @@ import json
 import logging
 from typing import Any
 
+import anthropic
 from openai import OpenAI
 
 from secubot.utils import get_config
@@ -24,9 +25,14 @@ _SYSTEM_PROMPT = (
     "Sois concis — maximum 400 mots. Réponds en français."
 )
 
+_NO_KEY_MESSAGE = (
+    "Explication indisponible : définissez ANTHROPIC_API_KEY ou OPENAI_API_KEY dans `.env` "
+    "pour activer l'analyse par modèle."
+)
+
 
 class Explainer:
-    """Wraps the OpenAI client to turn structured reports into prose."""
+    """Turns structured scan reports into French prose via Anthropic (preferred) or OpenAI."""
 
     def __init__(self) -> None:
         """Create an explainer using current environment configuration."""
@@ -40,14 +46,41 @@ class Explainer:
             report: Output of ``WebScanner.run_full_scan`` (JSON-serializable).
 
         Returns:
-            Model-generated explanation, or a placeholder if API is unavailable.
+            Model-generated explanation, or a placeholder if no provider is configured.
         """
 
-        if not self._settings.openai_api_key.strip():
-            return (
-                "Explication indisponible : définissez OPENAI_API_KEY dans votre fichier "
-                "`.env` pour activer l'analyse par modèle."
+        if self._settings.anthropic_api_key.strip():
+            return self._explain_anthropic(report)
+        if self._settings.openai_api_key.strip():
+            return self._explain_openai(report)
+        return _NO_KEY_MESSAGE
+
+    def _explain_anthropic(self, report: dict[str, Any]) -> str:
+        """Call Anthropic Messages API (default: small Haiku for low cost)."""
+
+        client = anthropic.Anthropic(api_key=self._settings.anthropic_api_key)
+        user_payload = json.dumps(report, ensure_ascii=False)
+        try:
+            msg = client.messages.create(
+                model=self._settings.anthropic_model,
+                max_tokens=1024,
+                system=_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": user_payload}],
             )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Anthropic explain failed: %s", str(exc))
+            return (
+                "Impossible de générer l'explication pour le moment. "
+                "Vérifiez votre clé API et le nom du modèle, puis réessayez."
+            )
+        for block in msg.content:
+            if block.type == "text":
+                return (block.text or "").strip()
+        return ""
+
+    def _explain_openai(self, report: dict[str, Any]) -> str:
+        """Call OpenAI Chat Completions (legacy path)."""
+
         client = OpenAI(api_key=self._settings.openai_api_key)
         try:
             completion = client.chat.completions.create(

@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     target_url: str = Field(default="https://example.com", alias="TARGET_URL")
     telegram_token: str = Field(default="", alias="TELEGRAM_TOKEN")
     telegram_chat_id: str = Field(default="", alias="TELEGRAM_CHAT_ID")
+    anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")
+    anthropic_model: str = Field(default="claude-3-5-haiku-20241022", alias="ANTHROPIC_MODEL")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o-mini", alias="OPENAI_MODEL")
     request_timeout_seconds: int = Field(default=10, alias="REQUEST_TIMEOUT_SECONDS")
