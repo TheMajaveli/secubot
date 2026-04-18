@@ -1,0 +1,16 @@
+# Pinned for reproducibility. Update via: pip-compile requirements.in
+# Last updated: 2026-04-18
+beautifulsoup4==4.12.3
+fastapi==0.115.6
+httpx==0.28.1
+openai==1.59.6
+pydantic==2.12.0
+pydantic-settings==2.7.0
+pytest==8.2.0
+pytest-asyncio==0.23.7
+pytest-mock==3.14.0
+python-dotenv==1.0.1
+python-telegram-bot==21.3
+respx==0.23.1
+rich==13.7.1
+uvicorn==0.29.0

@@ -1,0 +1,35 @@
+---
+description: SecuBot release pipeline — build prompt, agents 01–05, Claude Code handoff
+alwaysApply: true
+---
+
+# SecuBot (this workspace only)
+
+## Build source of truth
+
+Initial implementation follows [SECUBOT_CURSOR_PROMPT.md](SECUBOT_CURSOR_PROMPT.md) (structure, modules, CI, Docker).
+
+## Agent playbooks (mandatory order)
+
+After the codebase exists, for **release readiness**, **pre-push**, **full SecuBot pass**, or similar: read each file below **in order**, apply fixes (not report-only where the playbook says to fix), then run verification.
+
+1. [.cursor/agents/secubot/01_security_hardening/AGENT.md](.cursor/agents/secubot/01_security_hardening/AGENT.md)
+2. [.cursor/agents/secubot/02_code_quality/AGENT.md](.cursor/agents/secubot/02_code_quality/AGENT.md)
+3. [.cursor/agents/secubot/03_test_coverage/AGENT.md](.cursor/agents/secubot/03_test_coverage/AGENT.md)
+4. [.cursor/agents/secubot/04_git_hygiene/AGENT.md](.cursor/agents/secubot/04_git_hygiene/AGENT.md)
+5. [.cursor/agents/secubot/05_docs_polish/AGENT.md](.cursor/agents/secubot/05_docs_polish/AGENT.md)
+
+## Verification (from main prompt)
+
+- `pip install -r requirements.txt`
+- `python -m pytest tests/ -v`
+- `python scripts/scan.py https://example.com --json`
+- API: `uvicorn secubot.api:app --reload` then `GET /health`
+
+## Handoff to Claude Code or a fresh chat
+
+When the user says they are **handing off**, **stopping**, or you are **near context limits**: update [SECUBOT_PROGRESS.md](SECUBOT_PROGRESS.md) with current phase (A–E), done items, **one** next step, git branch/dirty state, and last verification command + result — **before** ending the turn.
+
+Resume prompt (also in [CLAUDE.md](CLAUDE.md)):
+
+> You are continuing SecuBot work. Read `SECUBOT_PROGRESS.md` and do only the **Next step** listed there. Follow `CLAUDE.md` for pipeline order and paths. After each logical chunk, update `SECUBOT_PROGRESS.md` and run the verification command for the current phase.
