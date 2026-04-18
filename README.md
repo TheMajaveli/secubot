@@ -97,7 +97,9 @@ docker compose up --build
 
 | Variable | Description | Required |
 |---|---|---|
-| `OPENAI_API_KEY` | OpenAI API key for explanations | For `--explain` only |
+| `ANTHROPIC_API_KEY` | Anthropic API key (used first if set; good for cheap testing) | For `--explain` / `/scan/explain` |
+| `ANTHROPIC_MODEL` | Claude model id (default: `claude-3-5-haiku-20241022`) | No |
+| `OPENAI_API_KEY` | OpenAI API key if you prefer OpenAI when Anthropic is unset | For `--explain` only |
 | `OPENAI_MODEL` | Model to use (default: `gpt-4o-mini`) | No |
 | `TELEGRAM_TOKEN` | Telegram bot token | For bot only |
 | `TELEGRAM_CHAT_ID` | Your Telegram chat ID | For bot only |
@@ -118,7 +120,7 @@ Built as a learning project to put Python into practice:
 
 - **Python async** — `asyncio.gather()` for concurrent scans, `httpx.AsyncClient`
 - **Web security** — OWASP headers, SSRF prevention, cookie flags, path enumeration
-- **LLM integration** — OpenAI API (v1.x SDK), structured prompting, graceful fallback
+- **LLM integration** — Anthropic or OpenAI, structured prompting, graceful fallback
 - **REST API** — FastAPI, Pydantic validation, middleware, structured error handling
 - **Bot development** — `python-telegram-bot` v21, async handlers, rate limiting
 - **Docker** — multi-stage build, non-root user, environment isolation
